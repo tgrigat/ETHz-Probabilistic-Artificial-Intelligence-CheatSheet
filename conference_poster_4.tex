@@ -75,7 +75,14 @@ linewidth=1pt % Width of the border lines around content boxes
 
 %--------------------------------------
 \colorbox[HTML]{CCFFFF}{\makebox[\textwidth-2\fboxsep][l]{\bf - Gaussian}}
-
+\textbf{Definition: Gaussian (Normal) distribution}
+{\footnotesize
+$$
+\mathcal N(\mathbf x;\boldsymbol\mu,\Sigma)=
+\frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}
+\exp\!\left(-\tfrac{1}{2}(\mathbf x-\boldsymbol\mu)^\top\Sigma^{-1}(\mathbf x-\boldsymbol\mu)\right)
+$$
+}
 $P(\mathcal N | \mathcal N)\sim \mathcal N(\mu_{A|B},\Sigma_{A|B})$
 \vspace{-0.3cm}
 $$\vspace{-0.2cm}
@@ -124,7 +131,7 @@ $$
 D_{KL}(p\Vert q) = \int  p(x)log\frac{p(x)}{q(x)}dx = H(p\vert q) - H(p)
 $$
 \begin{itemize}\compresslist
-    \item $D_{KL}(p||q)$(backward) : mode averageing 
+    \item $D_{KL}(p||q)$(backward) : mode averaging 
     \item $D_{KL}(q||p)$(forward) : mode seeking
     
     $p\sim\mathcal N(0,diag(\sigma_1^2,\sigma_2^2))\Rightarrow\sigma_q^2 = \frac{2}{\sigma_1^{-2}+\sigma_2^{-2}}$
@@ -146,9 +153,12 @@ $$
 $$\vspace{-0.2cm}
 P(w|Y,X) \sim \mathcal N(\mu,\Sigma)
 $$
+$$
+P(y_* \mid X,Y,x_*) = \mathcal{N}\!\left(\bar{\mu}^\top x_*,\; x_*^\top \bar{\Sigma}\, x_* + \sigma_n^2\right)
+$$
 $$\vspace{-0.2cm}
-\mu = \frac{1}{\sigma_n^2}\Sigma X^\top Y \quad
-\Sigma = \left(\frac{1}{\sigma_n^2}X^\top X + \frac{1}{\sigma_p^2}I\right)^{-1}
+\bar{\mu} = \frac{1}{\sigma_n^2}\bar{\Sigma} X^\top Y \quad
+\bar{\Sigma} = \left(\frac{1}{\sigma_n^2}X^\top X + \frac{1}{\sigma_p^2}I\right)^{-1}
 $$
 uncertainty: \textcolor{orange}{aleartoric(rand)} + \textcolor{green}{epistemic(know)}
 
@@ -175,8 +185,7 @@ uncertainty: \textcolor{orange}{aleartoric(rand)} + \textcolor{green}{epistemic(
 \underline{\textbf{Bayesian Logistic Regression}}
 \vspace{-0.2cm}
 \begin{itemize}\compresslist
-    \item posterior is not gaussian
-    \item posterior is not closed 
+    \item posterior is not gaussian and not closed
     \item posterior log-density  is convex
     \item $\sigma\uparrow \rightarrow$ standard logistic regression
     \item posterior cannot cover by $\mathcal N$ variational infer   
@@ -191,11 +200,11 @@ $$
 \begin{aligned}
 y &= f(x) + \epsilon \quad \epsilon\sim\mathcal N(0,\sigma_n^2)
 \\
-&P(f|X,Y)\sim GP(f;\mu',k')
+&P(f|X,Y, x^*)\sim GP(f;\mu',k')
 \\
-\mu'_{x^*} &= \mu_{x^*} + K_{x^*X}(K_{XX}+\sigma_n^2I)^{-1}Y
+\mu'(x^*) &= \mu(x^*) + K_{x^*X}(K_{XX}+\sigma_n^2I)^{-1}Y
 \\
-k'_{x^*x^*} &= K_{x^*x^*} - K_{x^*X}^\top (K_{XX}+\sigma_n^2I)^{-1}K_{x^*X}
+k'(x^*) &= K_{x^*x^*} - K_{x^*X} (K_{XX}+\sigma_n^2I)^{-1}K_{x^*X}^\top
 \end{aligned}
 $$
 $\mathcal O(n^3)$ for the inverse operation
@@ -211,41 +220,62 @@ $$
 $l$:  length scale control the distance of data
 
 $\sigma_F$ : output scale  control  the magnitude
+
+\underline{\textbf{Kernel properties}}
+\vspace{-0.2cm}
+\begin{itemize}\compresslist
+    \item \textbf{Stationary}: translation invariant, \(\;k(x,x')=k(x-x')\;\).
+    \item \textbf{Isotropic/Stationary}: depends only on the distance, \(\;k(x,x')=k(\|x-x'\|)\;\).
+    \item \textbf{Isotropic}: rotation invariant, \(\;k(Rx,Rx')=k(x,x')\;\).
+
+\end{itemize}
+
+\underline{\textbf{Kernel conditions}}
+\vspace{-0.2cm}
 $$
-\begin{aligned}
-\underset{l\rightarrow 0}{lim}~k(u,v) &= \sigma_F^2\delta(u-v)\\
-\underset{l\rightarrow 0}{lim}~k'(x,x) &= k(x,x) - k_{xX}(K_{XX}+\sigma_n^2 I)^{-1}k_{xX}^\top \\
-&= \frac{\sigma_F^2\sigma_n^2}{\sigma_F^2 + \sigma_n^2}
-\end{aligned}
+K_{ij}=k(x_i,x_j)
 $$
-\begin{center}
-\includegraphics[width=0.9\textwidth, trim={0cm 3cm 0 2cm},clip]{figures/9ZdGX6UqMPl2WkR.png}
-    \begin{tabular}{c | c}
-         $\sigma_F^2=0.5\quad l=4$ & $\sigma_F^2=2\quad l=1$ \\\hline
-         $\sigma_F^2=0.5\quad l=1$ & $\sigma_F^2=2\quad l=4$
-    \end{tabular}
-\end{center}
+\begin{itemize}\compresslist
+    \item symmetry: $k(x,x')=k(x',x)$
+    \item positive semi-definiteness: for any finite set $\{x_i\}_{i=1}^n$ and any $z\in\mathbb{R}^n$, \; $z^\top K z \ge 0$ \quad (ensures variances $\ge 0$) 
+\end{itemize}
+\underline{\textbf{Kernel composition rules}}
+\vspace{-0.2cm}
+\begin{itemize}\compresslist
+    \item $k_1,k_2: X\times X\to\mathbb R$
+    \item $k(x,x') = k_1(x,x') + k_2(x,x')$
+    \item $k(x,x') = c\,k_1(x,x'),\quad c>0$
+    \item $k(x,x') = k_1(x,x')\,k_2(x,x')$
+    \item $k(x,x') = f\big(k_1(x,x')\big)$
+    \item $k(x,x') = \sum_{i=1}^n \phi_i(x)\,\phi_i(x')$ (feature maps are valid)
+\end{itemize}
 
-\textit{Linear}\vspace{-0.3cm}
+\vspace{-0.2cm}
+\underline{\textbf{Bivariate covariance}}
+\vspace{-0.2cm}
 $$
-k(u,v) = \lambda uv
+\operatorname{Cov}\!\begin{pmatrix}X\\[2pt]Y\end{pmatrix}
+=
+\begin{bmatrix}
+\operatorname{Var}(X) & \operatorname{Cov}(X,Y)\\[4pt]
+\operatorname{Cov}(X,Y) & \operatorname{Var}(Y)
+\end{bmatrix}
 $$
-equals to BLR with $\lambda  = \sigma_p^2$
+\noindent where \(\operatorname{Cov}(X,Y)=k(x,y)\) (kernel function)
 
-\begin{center}
-    
-
-\includegraphics[width=0.9\textwidth,trim={0cm 3cm 0 2cm},clip]{figures/73sxNuLMZocVWTp.png}
-    \begin{tabular}{c | c}
-         $exp(-\lambda^2(x-y)^2)$ & $exp(-\lambda|x-y|)$ \\\hline
-         $\lambda xy$ & $cos(2\lambda |x-y|)$
-    \end{tabular}
-\end{center}
-
-
-
-
-
+\colorbox[HTML]{CCFFFF}{\makebox[\textwidth-2\fboxsep][l]{\bf - Hyperparameter optimization}}
+\vspace{-0.3cm}
+$$
+\log p(y\mid X,\theta)= -\tfrac{1}{2}y^\top K_y^{-1}y
+-\tfrac{1}{2}\log|K_y|-\tfrac{n}{2}\log(2\pi),\quad
+$$
+$$
+K_y\coloneqq K_{f,\theta}+\sigma_n^2 I,\ \alpha\coloneqq K_y^{-1}y
+$$
+$$
+\frac{\partial}{\partial\theta_j}\log p(y\mid X,\theta)
+= \tfrac{1}{2}\operatorname{tr}\!\Big((\alpha\alpha^\top - K_y^{-1})\frac{\partial K_y}{\partial\theta_j}\Big)
+$$
 
 }
 
@@ -304,42 +334,38 @@ x_{k+1} \sim (a x_k,\sigma^2) , x_0=0 \rightarrow MLE(a) = \frac{\sum_{i=0}^{n-1
 $$
 
 if $a\sim \mathcal N(0, \frac{\sigma^2}{\lambda})$, $Var(a|x_0,\cdots,x_n) = \frac{\sigma^2}{\lambda + \sum_{i=0}^{n-1}x_i^2}$
-
-\underline{\textbf{Wiener process/Brownian motion}}
-
-assume $P(x_{t+1}|x_t)\sim\mathcal N(x_t,\sigma_x^2)\quad x_0\sim\mathcal N(0,\sigma_0^2)$, the Kalman Filter can be seen as a GP
-
-$f\sim \mathcal{GP}(0, k_{KF})\quad k_{KF}(x,x') = \sigma_0^2 + \sigma_x^2 min\{x,x'\}$
-
-\begin{center}
-    \includegraphics[width=0.8\textwidth,trim={0cm 4cm 0 3cm},clip]{figures/czu87jWDYg1FQRy.png}
-\end{center}
+\underline{\textbf{Prior / Likelihood}}
+\vspace{-0.2cm}
+$$
+p(\theta)\,,\qquad
+p(\mathcal D\mid\theta)=\prod_{i=1}^n p(y_i\mid x_i,\theta)\quad(\text{i.i.d.})
+$$
+\underline{\textbf{Bayesian update}}
 \vspace{-0.3cm}
 $$
-\begin{aligned}
-x_0\sim \mathcal N(\left[\begin{smallmatrix}
-2,0
-\end{smallmatrix}\right]^\top,\sigma^2 I) 
-\\
-x_{t+1} = 
-\left[\begin{smallmatrix}
-1 & 1 \\ 0 & a
-\end{smallmatrix}\right]x_t
-\quad
-y_t\sim  \mathcal N (\left[\begin{smallmatrix}
-    1 \\ 0 
-\end{smallmatrix}\right] x_t, \sigma_y^2)
-\end{aligned}
+p(\theta\mid\mathcal D) \;=\; \frac{p(\mathcal D\mid\theta)\,p(\theta)}{p(\mathcal D)}
+\hspace{5pt}
+p(\mathcal D)=\int p(\mathcal D\mid\theta)\,p(\theta)\,d\theta
 $$
 
-\begin{tabular}{c|c}
-    $a=1, \sigma=1, \sigma_y=1$& $a=1,\sigma=1,\sigma_y=1$ \\\hline
-    $a=1, \sigma=10, \sigma_y=10$ & $a=0.5,\sigma=1,\sigma_y=10$ \\
-\end{tabular}
+\underline{\textbf{Posterior predictive (prediction)}}
+\vspace{-0.3cm}
+$$
+p(y_*\mid x_*,\mathcal D)=\int p(y_*\mid x_*,\theta)\,p(\theta\mid\mathcal D)\,d\theta
+$$
 
-
+\textbf{Probability laws(continuous case)}
+\vspace{-0.2cm}
+$$
+Probability: P(A)=\int P(A\mid B=b)\,p_B(b)\,db
+$$
+$$
+Expectation: \mathbb{E}[X]=\mathbb{E}\big[\mathbb{E}[X\mid Y]\big]
+$$
+$$
+Var: \operatorname{Var}(X)=\mathbb{E}\big[\operatorname{Var}(X\mid Y)\big]+\operatorname{Var}\big(\mathbb{E}[X\mid Y]\big)
+$$
 }
-
 %------------------------------------------------
 % Approximation & Markov Chain Monte Carlo
 %------------------------------------------------
@@ -347,12 +373,11 @@ $$
 \headerbox{Approximation \& MCMC}{name=results,column=3,span=1,row=0}{
 
 \colorbox[HTML]{CCFFFF}{\makebox[\textwidth-2\fboxsep][l]{\bf - Approximation}}
-\underline{\textbf{Laplacian approximation}}
+\underline{\textbf{Laplacian approximation $q(\theta)\sim \mathcal{N}(\hat\theta, \Lambda^{-1})~~$}}
 \vspace{-0.3cm}
 $$
-q(\theta)\sim \mathcal (\hat\theta, \Lambda^{-1})~~
 \hat\theta = \underset{\theta}{argmax}~p(\theta|y)~~
-\Lambda = -\nabla\nabla p(\hat\theta|y)
+\Lambda = -\nabla\nabla log(p(\hat\theta|y))
 $$
 \vspace{-1.0cm}
 \begin{itemize}\compresslist
@@ -563,7 +588,7 @@ $$
 \vspace{-0.3cm}
 $$\vspace{-0.3cm}
 \begin{aligned}
-F(s) &= H(f) - H(f|y_s) = \frac{1}{2}log|I+\sigma^{-2}K_s|
+I(s) &= H(f) - H(f|y_s) = \frac{1}{2}log|I+\sigma_n^{-2}K_s|
 \\
 F(S_T) &\ge (1-\frac{1}{e})\underset{S\subseteq D,|S|\le T}{max}~F(S)
 \end{aligned}
